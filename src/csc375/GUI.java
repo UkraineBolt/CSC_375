@@ -7,8 +7,9 @@ package csc375;
 
 
 import java.awt.Color;
-import java.awt.Component;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 /**
@@ -28,10 +29,6 @@ public class GUI extends JFrame{
     private static final int INDEX_FOR_LENGTH_TEXTFIELD = 3;
     private static final int INDEX_FOR_LENGTH_BUTTON = 4;
     
-    private static final int INDEX_FOR_JTABLE = 0;
-    
-    private static final int[] INDEXES_FOR_PATH_TO_BOARD = new int[]{INDEX_FOR_BOARD,INDEX_FOR_JTABLE};
-    
     private static final int COLUMNSIZE = 10;
     private static final int ROWSIZE = 10;
     
@@ -43,40 +40,42 @@ public class GUI extends JFrame{
     
     private boolean changeTableSize(int row, int column){
         try{
-            JTable table = (JTable) this.getBuriedComponent(INDEXES_FOR_PATH_TO_BOARD.length, INDEXES_FOR_PATH_TO_BOARD);
-            this.setUpCellSize(table,row,column);
+            JPanel masterframe = (JPanel)this.getContentPane().getComponent(0);
+            JPanel subframe = (JPanel)masterframe.getComponent(1);
+            JTable table = (JTable) subframe.getComponent(0);
+            table.setModel(new DefaultTableModel(row,column));
+            this.setUpCellSize(table,ROWSIZE,COLUMNSIZE);
             return true;
         }catch(Exception e){
             return false;
         }
     }
     
-    private Component getBuriedComponent(int layer, int[] path){
-        Component traveler = this.getContentPane().getComponent(0);        
-        for(int depth=0;depth<layer;depth++){
-            traveler = this.getComponent(path[depth]);
-        }
-        
-        return traveler;
-    }
-    
     private boolean setUp(){
         try{
-            jlabelx = this.setUpJLabel("Width of Board"); 
+            jlabelx = this.setUpJLabel("Length of Board"); 
             jtextfieldx = this.setUpJTextField();
-            jlabely = this.setUpJLabel("Length of Board"); 
+            jlabely = this.setUpJLabel("Width of Board"); 
             jtextfieldy = this.setUpJTextField(); 
             jbutton=this.setUpJButton("Begin Program");
-            jbutton.addActionListener(action -> {
-                try{
+            jbutton.addActionListener((ActionEvent action) -> {
+                try {
                     String stringx = jtextfieldx.getText();
                     String stringy = jtextfieldy.getText();
+                    jtextfieldx.setText("");
+                    jtextfieldy.setText("");
+                    int length = Integer.parseInt(stringx);
+                    int width = Integer.parseInt(stringy);
+                    if (length <= 0 || width <= 0 ||length >= 99 || width >= 73) {
+                        throw new NumberFormatException();
+                    }
+                    this.changeTableSize(width, length);
+                }catch(NumberFormatException e){
+                    System.out.println("number converter broke");
                 }catch(Exception e){
-                    
+                    System.out.println("something else broke");
                 }
-                
             });
-            
             
             JPanel panel = this.setStaticPanel(jlabelx,jtextfieldx,jlabely,jtextfieldy,jbutton);
             
@@ -98,8 +97,6 @@ public class GUI extends JFrame{
             return false;
         }
     }
-    
-    
     
     private JTable setUpCellSize(JTable table, int row, int column){
         table.setRowHeight(row);
