@@ -9,6 +9,13 @@ package csc375;
  *
  * @author alex
  */
-public class Handler {
+public class Dataplot {
+    int[] location;
+    int affinity;
+    Dataplot(int x, int y, int affinity){
+        this.affinity=affinity;
+        location = new int[] {x, y};
+    }
+    
     
 }
