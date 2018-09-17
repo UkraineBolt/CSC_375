@@ -9,41 +9,76 @@ package csc375;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+
 
 /**
  *
  * @author alex
  */
-public class GUI extends JFrame{
-    private static final int WIDTH_OF_FRAME = 1500;
-    private static final int LENGTH_OF_FRAME = 800;
+public class GUI extends JFrame{//comments after globals are their default/starting value
+    private static final int DEFAULT_TABLE_SIZE = 35;//35
+    private static final int DEFAULT_MACHINES = 500;//500
     
-    private static final int INDEX_FOR_BOARDERPANE = 0;
-    private static final int INDEX_FOR_BOARD = 1;
+    private static final int WIDTH_OF_FRAME = 1500;//1500
+    private static final int LENGTH_OF_FRAME = 800;//800
     
-    private static final int INDEX_FOR_WIDTH_LABEL = 0;
-    private static final int INDEX_FOR_LENGTH_LABEL = 2;
-    private static final int INDEX_FOR_WIDTH_TEXTFIELD = 1;
-    private static final int INDEX_FOR_LENGTH_TEXTFIELD = 3;
-    private static final int INDEX_FOR_LENGTH_BUTTON = 4;
+    private static final int INDEX_FOR_BOARDERPANE = 0;//0
+    private static final int INDEX_FOR_BOARD = 1;//1
     
-    private static final int COLUMNSIZE = 10;
-    private static final int ROWSIZE = 10;
+    private static final int INDEX_FOR_WIDTH_LABEL = 0;//0
+    private static final int INDEX_FOR_LENGTH_LABEL = 2;//2
+    private static final int INDEX_FOR_WIDTH_TEXTFIELD = 1;//1
+    private static final int INDEX_FOR_LENGTH_TEXTFIELD = 3;//3
+    private static final int INDEX_FOR_LENGTH_BUTTON = 6;//6
+    private static final int INDEX_FOR_MACHINE_AMOUNT_LABEL = 4;//4
+    private static final int INDEX_FOR_MACHINE_AMOUNT_TEXTFIELD = 5;//5
+    
+    
+    private static final int COLUMNSIZE = 10;//10
+    private static final int ROWSIZE = 10;//10
+    private static final int TEXTFIELD_COLUMNSIZE = 10;//10
     
     private JButton jbutton;
     private JLabel jlabelx;
     private JTextField jtextfieldx;
     private JLabel jlabely;
     private JTextField jtextfieldy;
+    private JLabel jlabelAmount;
+    private JTextField jtextfieldAmount;
     
-    private boolean changeTableSize(int row, int column){
+    private Factory factory;
+    
+    private boolean changeTableSize(Point[][] board){
         try{
             JPanel masterframe = (JPanel)this.getContentPane().getComponent(0);
             JPanel subframe = (JPanel)masterframe.getComponent(1);
             JTable table = (JTable) subframe.getComponent(0);
-            table.setModel(new DefaultTableModel(row,column));
+            table.setModel(new AbstractTableModel() {
+                private Point[][] table = board;
+                
+                public void setValueAt(Point value, int row, int col) {
+                    table[row][col] = value;
+                    fireTableCellUpdated(row, col);
+                }
+                
+                @Override
+                public int getRowCount() {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                public int getColumnCount() {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                public Object getValueAt(int rowIndex, int columnIndex) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            });
             this.setUpCellSize(table,ROWSIZE,COLUMNSIZE);
             return true;
         }catch(Exception e){
@@ -57,29 +92,69 @@ public class GUI extends JFrame{
             jtextfieldx = this.setUpJTextField();
             jlabely = this.setUpJLabel("Width of Board"); 
             jtextfieldy = this.setUpJTextField(); 
+            jlabelAmount = this.setUpJLabel("Amount of machines");
+            jtextfieldAmount = this.setUpJTextField();
             jbutton=this.setUpJButton("Begin Program");
             jbutton.addActionListener((ActionEvent action) -> {
                 try {
                     String stringx = jtextfieldx.getText();
                     String stringy = jtextfieldy.getText();
+                    String amount = jtextfieldAmount.getText();
                     jtextfieldx.setText("");
                     jtextfieldy.setText("");
+                    jtextfieldAmount.setText("");
                     int length = Integer.parseInt(stringx);
                     int width = Integer.parseInt(stringy);
-                    if (length <= 0 || width <= 0 ||length >= 99 || width >= 73) {
+                    int amountOfMachines = Integer.parseInt(amount);
+                    if (length <= 32 || width <= 32 ||length >= 99 || width >= 73 || amountOfMachines < 5 || amountOfMachines > length * width) {
                         throw new NumberFormatException();
                     }
-                    this.changeTableSize(width, length);
+                    factory = new Factory(length,width,amountOfMachines);
+                    System.out.println("factory is built");
+                    this.changeTableSize(factory.getFactory());
+                    factory.multiThreadedSwapping();
+                    
                 }catch(NumberFormatException e){
-                    System.out.println("number converter broke");
+                    System.out.println("running with preset");
+                    factory = new Factory(DEFAULT_TABLE_SIZE,DEFAULT_TABLE_SIZE,DEFAULT_MACHINES);
+                    System.out.println("factory is built");
+                    this.changeTableSize(factory.getFactory());
+                    factory.multiThreadedSwapping();
                 }catch(Exception e){
                     System.out.println("something else broke");
+                    System.exit(33637);
                 }
             });
             
-            JPanel panel = this.setStaticPanel(jlabelx,jtextfieldx,jlabely,jtextfieldy,jbutton);
+            JPanel panel = this.setStaticPanel(jlabelx,jtextfieldx,jlabely,jtextfieldy,jlabelAmount,jtextfieldAmount,jbutton);
             
-            JTable board = new JTable(35,35);
+            JTable board = new JTable(DEFAULT_TABLE_SIZE,DEFAULT_TABLE_SIZE);
+            board.setModel(new AbstractTableModel() {
+                private Point[][] table;
+                public void setPointBoard(Point[][] board){
+                    table = board;
+                    
+                }
+                public void setValueAt(Point value, int row, int col) {
+                    table[row][col] = value;
+                    fireTableCellUpdated(row, col);
+                }
+                
+                @Override
+                public int getRowCount() {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                public int getColumnCount() {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                public Object getValueAt(int rowIndex, int columnIndex) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+            });
             board.setBorder(BorderFactory.createLineBorder(Color.black));
             board.setEnabled(false);
             
@@ -106,12 +181,14 @@ public class GUI extends JFrame{
         }
         return table;
     }
-    private JPanel setStaticPanel(JLabel xLabel, JTextField xTextField, JLabel yLabel, JTextField yTextField, JButton button){
+    private JPanel setStaticPanel(JLabel xLabel, JTextField xTextField, JLabel yLabel, JTextField yTextField, JLabel amountLabel, JTextField amountField,JButton button){
         JPanel jpanel = new JPanel();
         jpanel.add(xLabel,INDEX_FOR_WIDTH_LABEL);
         jpanel.add(xTextField,INDEX_FOR_WIDTH_TEXTFIELD);
         jpanel.add(yLabel,INDEX_FOR_LENGTH_LABEL);
         jpanel.add(yTextField,INDEX_FOR_LENGTH_TEXTFIELD);
+        jpanel.add(amountLabel,INDEX_FOR_MACHINE_AMOUNT_LABEL);
+        jpanel.add(amountField,INDEX_FOR_MACHINE_AMOUNT_TEXTFIELD);
         jpanel.add(button,INDEX_FOR_LENGTH_BUTTON);
         return jpanel;
     }
@@ -122,7 +199,7 @@ public class GUI extends JFrame{
     }
     private JTextField setUpJTextField(){
         JTextField textField = new javax.swing.JTextField();
-        textField.setColumns(10);
+        textField.setColumns(TEXTFIELD_COLUMNSIZE);
         textField.setVisible(true);
         return textField;
     }
