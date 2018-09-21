@@ -50,7 +50,7 @@ public class Factory{
         
         return getFactory();
     }
-    private double affinity(){
+    private double affinity(Point point){
         
         return 0.0;
     }

@@ -73,6 +73,10 @@ public class GUI extends JFrame{//comments after globals are their default/start
         }
     }
     
+    public synchronized void refreash(Point[][] board){
+        customModel.setTable(board);
+    }
+    
     private boolean setUp(){
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setTitle("Project 1");
