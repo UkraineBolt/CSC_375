@@ -19,14 +19,14 @@ public class Factory{
     Factory(int length, int width, int machinesToUse) {
         int addedMachines = 0;
         points = new Point[machinesToUse];
-        Point[][] emptyBoard = new Point[width][length];
+        Point[][] emptyBoard = new Point[length][width];
         if (length*width!=machinesToUse) {
             while (addedMachines < machinesToUse) {
                 int ranx = new Random().nextInt(length);
                 int rany = new Random().nextInt(width);
-                if (emptyBoard[rany][ranx] == null) {
+                if (emptyBoard[ranx][rany] == null) {
                     Point point = new Point(ranx, rany, new Random().nextFloat());
-                    emptyBoard[rany][ranx] = point;
+                    emptyBoard[ranx][rany] = point;
                     points[addedMachines] = point;
                     addedMachines++;
                     System.out.println(addedMachines);
@@ -59,5 +59,5 @@ public class Factory{
     see direction of most positive A {top,left,right,bottom}
     move in that direction and if lock then swap otherwise move and delete old reference
     */
-
+    
 }

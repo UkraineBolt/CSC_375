@@ -39,9 +39,6 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private static final int ROWSIZE = 10;//10
     private static final int TEXTFIELD_COLUMNSIZE = 10;//10
     
-    private static final int AMOUNT_OF_THREADS = 1;
-    private static final int ITTERATIONS = 100;
-    
     private JButton jbutton;
     private JLabel jlabelx;
     private JTextField jtextfieldx;
@@ -65,8 +62,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private boolean changeTableSize(Point[][] board){
         try{
             customModel.setTable(board);
-            //this.board.setModel(customModel);
-            //this.setUpCellSize(this.board,ROWSIZE,COLUMNSIZE);
+            setUpCellSize(this.board);
             return true;
         }catch(Exception e){
             return false;
@@ -75,6 +71,8 @@ public class GUI extends JFrame{//comments after globals are their default/start
     
     public synchronized void refreash(Point[][] board){
         customModel.setTable(board);
+        //setUpCellSize(this.board, board[0].length, board.length);
+        
     }
     
     private boolean setUp(){
@@ -108,18 +106,14 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     factory = new Factory(length,width,amountOfMachines);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
-                    for(int iterator = 0;iterator<ITTERATIONS;iterator++){
                     factory.multiThreadedSwapping();
-                    }
                     
                 }catch(NumberFormatException e){
                     System.out.println("running with preset");
                     factory = new Factory(DEFAULT_TABLE_SIZE,DEFAULT_TABLE_SIZE,DEFAULT_MACHINES);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
-                    for(int iterator = 0;iterator<ITTERATIONS;iterator++){
                     factory.multiThreadedSwapping();
-                    }
                 }catch(Exception e){
                     System.out.println("something else broke");
                     System.exit(33637);
@@ -128,12 +122,12 @@ public class GUI extends JFrame{//comments after globals are their default/start
             
             JPanel panel = this.setStaticPanel(jlabelx,jtextfieldx,jlabely,jtextfieldy,jlabelAmount,jtextfieldAmount,jbutton);
             
-            customModel = new CustomTableModel(new Point[DEFAULT_TABLE_SIZE][DEFAULT_TABLE_SIZE],null);
+            customModel = new CustomTableModel(new Point[DEFAULT_TABLE_SIZE][DEFAULT_TABLE_SIZE]);
             board = new JTable(customModel);
             
             board.setBorder(BorderFactory.createLineBorder(Color.black));
             board.setEnabled(false);
-            board = this.setUpCellSize(board,ROWSIZE,COLUMNSIZE);
+            board = this.setUpCellSize(board);
             board.setVisible(true);
             boarderPane = new JPanel();
             boarderPane.add(board);
@@ -150,11 +144,11 @@ public class GUI extends JFrame{//comments after globals are their default/start
         }
     }
     
-    private JTable setUpCellSize(JTable table, int row, int column){
-        table.setRowHeight(row);
+    private JTable setUpCellSize(JTable table){
+        table.setRowHeight(ROWSIZE);
         TableColumnModel columnModel = table.getColumnModel();
         for(int dex = 0;dex<columnModel.getColumnCount();dex++){
-            columnModel.getColumn(dex).setPreferredWidth(column);
+            columnModel.getColumn(dex).setPreferredWidth(COLUMNSIZE);
         }
         return table;
     }

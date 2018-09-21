@@ -29,6 +29,11 @@ public class Point {
     }
     public float returnRateOfProduction(){return rateOfProduction;}
     
+    public synchronized boolean changePosition(int x,int y){
+        this.x = x; this.y = y;
+        return true;
+    }
+    
     @Override
     public String toString(){
         return "X";

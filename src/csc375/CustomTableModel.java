@@ -12,36 +12,35 @@ import javax.swing.table.AbstractTableModel;
  * @author alex
  */
 public class CustomTableModel extends AbstractTableModel {
-
-    private final String[] empty;
     private Point[][] table;
     
-    CustomTableModel(Point[][] table, String[] header){
-        this.table=table;empty = new String[table[0].length];
+    CustomTableModel(Point[][] table){
+        this.table=table;
     }
 
     public void setTable(Point[][] table) {
         this.table = table;
         fireTableDataChanged();
+        fireTableStructureChanged();
     }
 
     public void setValueAt(Point value, int row, int col) {
-        table[row][col] = value;
-        fireTableCellUpdated(row, col);
+        table[col][row] = value;
+        fireTableDataChanged();
     }
 
     @Override
     public int getRowCount() {
-        return table.length;
+        return table[0].length;
     }
 
     @Override
     public int getColumnCount() {
-        return empty.length;
+        return table.length;
     }
 
     @Override
     public Point getValueAt(int row, int col) {
-        return table[row][col];
+        return table[col][row];
     }
 }
