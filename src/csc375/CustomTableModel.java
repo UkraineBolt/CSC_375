@@ -31,12 +31,12 @@ public class CustomTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return table[0].length;
+        return table[0].length-1;
     }
 
     @Override
     public int getColumnCount() {
-        return table.length;
+        return table.length-1;
     }
 
     @Override

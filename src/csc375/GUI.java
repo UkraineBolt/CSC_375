@@ -39,6 +39,9 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private static final int ROWSIZE = 10;//10
     private static final int TEXTFIELD_COLUMNSIZE = 10;//10
     
+    private static final int AMOUNT_OF_THREADS = 1;
+    private static final int AMOUNT_OF_ITERATIONS = 15;
+    
     private JButton jbutton;
     private JLabel jlabelx;
     private JTextField jtextfieldx;
@@ -54,10 +57,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
     
     private CustomTableModel customModel;
     
-    
     private Factory factory;
-    
-    
     
     private boolean changeTableSize(Point[][] board){
         try{
@@ -71,8 +71,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
     
     public synchronized void refreash(Point[][] board){
         customModel.setTable(board);
-        //setUpCellSize(this.board, board[0].length, board.length);
-        
+        setUpCellSize(this.board);
     }
     
     private boolean setUp(){
@@ -106,14 +105,17 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     factory = new Factory(length,width,amountOfMachines);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
-                    factory.multiThreadedSwapping();
+                    //add shit here
+                    
                     
                 }catch(NumberFormatException e){
                     System.out.println("running with preset");
                     factory = new Factory(DEFAULT_TABLE_SIZE,DEFAULT_TABLE_SIZE,DEFAULT_MACHINES);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
-                    factory.multiThreadedSwapping();
+                    factory.multiThreadingSwap(AMOUNT_OF_THREADS, AMOUNT_OF_ITERATIONS);
+                    
+                    
                 }catch(Exception e){
                     System.out.println("something else broke");
                     System.exit(33637);
