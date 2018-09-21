@@ -5,12 +5,10 @@
  */
 package csc375;
 
-
+//array[row][col]==>[y][x]
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 
@@ -41,6 +39,9 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private static final int ROWSIZE = 10;//10
     private static final int TEXTFIELD_COLUMNSIZE = 10;//10
     
+    private static final int AMOUNT_OF_THREADS = 1;
+    private static final int ITTERATIONS = 100;
+    
     private JButton jbutton;
     private JLabel jlabelx;
     private JTextField jtextfieldx;
@@ -49,37 +50,23 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private JLabel jlabelAmount;
     private JTextField jtextfieldAmount;
     
+    private JTable board;
+    
+    private JPanel masterFrame;
+    private JPanel boarderPane;
+    
+    private CustomTableModel customModel;
+    
+    
     private Factory factory;
+    
+    
     
     private boolean changeTableSize(Point[][] board){
         try{
-            JPanel masterframe = (JPanel)this.getContentPane().getComponent(0);
-            JPanel subframe = (JPanel)masterframe.getComponent(1);
-            JTable table = (JTable) subframe.getComponent(0);
-            table.setModel(new AbstractTableModel() {
-                private Point[][] table = board;
-                
-                public void setValueAt(Point value, int row, int col) {
-                    table[row][col] = value;
-                    fireTableCellUpdated(row, col);
-                }
-                
-                @Override
-                public int getRowCount() {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public int getColumnCount() {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public Object getValueAt(int rowIndex, int columnIndex) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-            });
-            this.setUpCellSize(table,ROWSIZE,COLUMNSIZE);
+            customModel.setTable(board);
+            //this.board.setModel(customModel);
+            //this.setUpCellSize(this.board,ROWSIZE,COLUMNSIZE);
             return true;
         }catch(Exception e){
             return false;
@@ -87,6 +74,11 @@ public class GUI extends JFrame{//comments after globals are their default/start
     }
     
     private boolean setUp(){
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setTitle("Project 1");
+        setSize(WIDTH_OF_FRAME, LENGTH_OF_FRAME);
+        setResizable(false);
+        
         try{
             jlabelx = this.setUpJLabel("Length of Board"); 
             jtextfieldx = this.setUpJTextField();
@@ -106,20 +98,24 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     int length = Integer.parseInt(stringx);
                     int width = Integer.parseInt(stringy);
                     int amountOfMachines = Integer.parseInt(amount);
-                    if (length <= 32 || width <= 32 ||length >= 99 || width >= 73 || amountOfMachines < 5 || amountOfMachines > length * width) {
+                    if (length >= 32 && width >= 32 && length <= 99 && width <= 73 && amountOfMachines < 5 && amountOfMachines < length * width) {
                         throw new NumberFormatException();
                     }
                     factory = new Factory(length,width,amountOfMachines);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
+                    for(int iterator = 0;iterator<ITTERATIONS;iterator++){
                     factory.multiThreadedSwapping();
+                    }
                     
                 }catch(NumberFormatException e){
                     System.out.println("running with preset");
                     factory = new Factory(DEFAULT_TABLE_SIZE,DEFAULT_TABLE_SIZE,DEFAULT_MACHINES);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
+                    for(int iterator = 0;iterator<ITTERATIONS;iterator++){
                     factory.multiThreadedSwapping();
+                    }
                 }catch(Exception e){
                     System.out.println("something else broke");
                     System.exit(33637);
@@ -128,45 +124,22 @@ public class GUI extends JFrame{//comments after globals are their default/start
             
             JPanel panel = this.setStaticPanel(jlabelx,jtextfieldx,jlabely,jtextfieldy,jlabelAmount,jtextfieldAmount,jbutton);
             
-            JTable board = new JTable(DEFAULT_TABLE_SIZE,DEFAULT_TABLE_SIZE);
-            board.setModel(new AbstractTableModel() {
-                private Point[][] table;
-                public void setPointBoard(Point[][] board){
-                    table = board;
-                    
-                }
-                public void setValueAt(Point value, int row, int col) {
-                    table[row][col] = value;
-                    fireTableCellUpdated(row, col);
-                }
-                
-                @Override
-                public int getRowCount() {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public int getColumnCount() {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public Object getValueAt(int rowIndex, int columnIndex) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-            });
+            customModel = new CustomTableModel(new Point[DEFAULT_TABLE_SIZE][DEFAULT_TABLE_SIZE],null);
+            board = new JTable(customModel);
+            
             board.setBorder(BorderFactory.createLineBorder(Color.black));
             board.setEnabled(false);
+            board = this.setUpCellSize(board,ROWSIZE,COLUMNSIZE);
+            board.setVisible(true);
+            boarderPane = new JPanel();
+            boarderPane.add(board);
             
-            JPanel boardpane = new JPanel();
-            boardpane.add(this.setUpCellSize(board,ROWSIZE,COLUMNSIZE),0);
+            masterFrame = new JPanel();
+            masterFrame.setLayout(new BoxLayout(masterFrame,BoxLayout.Y_AXIS));
+            masterFrame.add(panel,INDEX_FOR_BOARDERPANE);
+            masterFrame.add(boarderPane,INDEX_FOR_BOARD);
             
-            JPanel masterPane = new JPanel();
-            masterPane.setLayout(new BoxLayout(masterPane,BoxLayout.Y_AXIS));
-            masterPane.add(panel,INDEX_FOR_BOARDERPANE);
-            masterPane.add(boardpane,INDEX_FOR_BOARD);
-            
-            this.getContentPane().add(masterPane);
+            this.getContentPane().add(masterFrame);
             return true;
         }catch(Exception e){
             return false;
@@ -209,12 +182,9 @@ public class GUI extends JFrame{//comments after globals are their default/start
         return button;
     }
     public GUI(){
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.setTitle("Project 1");
-        this.setSize(WIDTH_OF_FRAME, LENGTH_OF_FRAME);
-        this.setResizable(false);
+        
         boolean token = this.setUp();
-        if(!token){System.exit(00100);}
+        if(!token){System.exit(100);}
     }   
     
     public static void main(String[] args) {

@@ -11,19 +11,23 @@ import java.util.Random;
  *
  * @author alex
  */
-public class Factory {
+public class Factory{
 
     private final Point[][] board;
+    private final Point[] points;
 
     Factory(int length, int width, int machinesToUse) {
         int addedMachines = 0;
+        points = new Point[machinesToUse];
         Point[][] emptyBoard = new Point[width][length];
         if (length*width!=machinesToUse) {
             while (addedMachines < machinesToUse) {
                 int ranx = new Random().nextInt(length);
                 int rany = new Random().nextInt(width);
                 if (emptyBoard[rany][ranx] == null) {
-                    emptyBoard[rany][ranx] = new Point(ranx, rany, new Random().nextFloat());
+                    Point point = new Point(ranx, rany, new Random().nextFloat());
+                    emptyBoard[rany][ranx] = point;
+                    points[addedMachines] = point;
                     addedMachines++;
                     System.out.println(addedMachines);
                 }
@@ -38,10 +42,22 @@ public class Factory {
         board = emptyBoard;
     }
     
-    public Point[][] getFactory(){return board;}
-    
-    public void multiThreadedSwapping(){
-        
+    public Point[][] getFactory(){
+        return board;
     }
+    
+    public Point[][] multiThreadedSwapping(){
+        
+        return getFactory();
+    }
+    private double affinity(){
+        
+        return 0.0;
+    }
+    /*
+    shit you need to do to get this to work
+    see direction of most positive A {top,left,right,bottom}
+    move in that direction and if lock then swap otherwise move and delete old reference
+    */
 
 }
