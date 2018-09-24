@@ -8,6 +8,7 @@ package csc375;
 //array[row][col]==>[y][x]
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.util.concurrent.*;
 import javax.swing.*;
 import javax.swing.table.TableColumnModel;
 
@@ -59,6 +60,21 @@ public class GUI extends JFrame{//comments after globals are their default/start
     
     private Factory factory;
     
+    
+    //everything below handles multithreading
+    private void multiThreading(){
+        Runnable r = () -> {
+            Factory loci = factory;
+            
+            //this.refreash(board);
+        };
+        ExecutorService pool = Executors.newFixedThreadPool(AMOUNT_OF_THREADS);
+        for(int iterator = 0;iterator<AMOUNT_OF_ITERATIONS;iterator++){
+            pool.submit(r);
+        }
+    }
+    
+    //Everything below handles GUI layout and stuff
     private boolean changeTableSize(Point[][] board){
         try{
             customModel.setTable(board);
@@ -69,7 +85,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
         }
     }
     
-    public synchronized void refreash(Point[][] board){
+    private void refreash(Point[][] board){
         customModel.setTable(board);
         setUpCellSize(this.board);
     }
@@ -113,7 +129,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     factory = new Factory(DEFAULT_TABLE_SIZE,DEFAULT_TABLE_SIZE,DEFAULT_MACHINES);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
-                    factory.multiThreadingSwap(AMOUNT_OF_THREADS, AMOUNT_OF_ITERATIONS);
+                    //add shit here
                     
                     
                 }catch(Exception e){
