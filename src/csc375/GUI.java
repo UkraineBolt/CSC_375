@@ -8,6 +8,7 @@ package csc375;
 //array[row][col]==>[y][x]
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 import javax.swing.*;
 import javax.swing.table.TableColumnModel;
@@ -41,7 +42,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private static final int TEXTFIELD_COLUMNSIZE = 10;//10
     
     private static final int AMOUNT_OF_THREADS = 1;
-    private static final int AMOUNT_OF_ITERATIONS = 15;
+    private static final int AMOUNT_OF_ITERATIONS = 100;
     
     private JButton jbutton;
     private JLabel jlabelx;
@@ -59,18 +60,23 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private CustomTableModel customModel;
     
     private Factory factory;
+    private ArrayList<Factory> outputs = new ArrayList<>();
     
     
     //everything below handles multithreading
     private void multiThreading(){
         Runnable r = () -> {
-            Factory loci = factory;
-            
-            //this.refreash(board);
+            Factory loci = new Factory(factory);
+            for(int threadProducer=0;threadProducer<AMOUNT_OF_ITERATIONS;threadProducer++){
+                
+            }
+            outputs.add(loci);
         };
-        ExecutorService pool = Executors.newFixedThreadPool(AMOUNT_OF_THREADS);
-        for(int iterator = 0;iterator<AMOUNT_OF_ITERATIONS;iterator++){
-            pool.submit(r);
+        
+        for(int iterator = 0;iterator<AMOUNT_OF_THREADS;iterator++){
+            Thread thread = new Thread(r,String.valueOf(iterator));
+            //if you need to ulter the thread do it here
+            thread.start();
         }
     }
     
@@ -121,7 +127,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     factory = new Factory(length,width,amountOfMachines);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
-                    //add shit here
+                    //this.multiThreading();
                     
                     
                 }catch(NumberFormatException e){
@@ -129,7 +135,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     factory = new Factory(DEFAULT_TABLE_SIZE,DEFAULT_TABLE_SIZE,DEFAULT_MACHINES);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
-                    //add shit here
+                    //this.multiThreading();
                     
                     
                 }catch(Exception e){

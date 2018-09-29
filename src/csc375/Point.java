@@ -16,13 +16,11 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Point {
     public ReentrantLock lock;
     volatile int x,y;
-    private int startX,startY;
     private float rateOfProduction;
-    private Color color;
-    private String id;
+    private final Color color;
+    private final String id;
     Point(int x,int y,float rateOfProduction){
         this.x=x;this.y=y;this.rateOfProduction=rateOfProduction;
-        startX=x;startY=y;
         float r = new Random().nextFloat();
         float g = new Random().nextFloat();
         float b = new Random().nextFloat();

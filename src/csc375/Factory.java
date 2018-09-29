@@ -6,8 +6,8 @@ ThreadLocalRandom.current().nextInt();
  */
 package csc375;
 
+import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
@@ -15,7 +15,10 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Factory {
     private final Point[][] board;
-    
+    ArrayList<Point> allFilledPoints = new ArrayList<>();
+    Factory(Factory f){
+        board = f.getFactory();
+    }
 
     Factory(int length, int width, int machinesToUse) {
         int addedMachines = 0;
@@ -28,13 +31,16 @@ public class Factory {
                     Point point = new Point(ranx, rany, new Random().nextFloat());
                     emptyBoard[ranx][rany] = point;
                     addedMachines++;
+                    allFilledPoints.add(point);
                     System.out.println(addedMachines);
                 }
             }
         } else {
             for (int y = 0; y < width; y++) {
                 for (int x = 0; x < length; x++) {
-                    emptyBoard[y][x] = new Point(x, y, new Random().nextFloat());
+                    Point point = new Point(x, y, new Random().nextFloat());
+                    emptyBoard[y][x] = point;
+                    allFilledPoints.add(point);
                 }
             }
         }
@@ -51,7 +57,7 @@ public class Factory {
             board[point.x][point.y]=null;
             board[newx][newy]=point;
             point.changePosition(newx, newy);
-        }else{//this will need to handle for deadlocks
+        }else{
             Point moveable = board[newx][newy];
             board[newx][newy] = point;
             board[point.x][point.y] = moveable;
@@ -61,12 +67,14 @@ public class Factory {
     }
     
     private double affinity(Point point, Point point2) {
-        double affinity = -2;
         double distance = Math.abs((point.x - point2.x) / (point.y - point2.y));
-        affinity = Math.sin(distance / Math.pow(point.returnRateOfProduction() * point2.returnRateOfProduction(), 2));
+        double affinity = Math.sin(Math.pow(point.returnRateOfProduction() * point2.returnRateOfProduction(), 2)/distance);
         return affinity;
     }
+    
+    public String mutation(Point point){
+        
+        return "X";
+    }
 
-    
-    
 }
