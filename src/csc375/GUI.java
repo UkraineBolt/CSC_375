@@ -42,8 +42,9 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private static final int TEXTFIELD_COLUMNSIZE = 10;//10
     
     private static final int AMOUNT_OF_THREADS = 1;
-    private static final int AMOUNT_OF_ITERATIONS = 100;
+    private static final int AMOUNT_OF_ITERATIONS = 1000;
     
+    //GUI stuff
     private JButton jbutton;
     private JLabel jlabelx;
     private JTextField jtextfieldx;
@@ -57,30 +58,65 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private JPanel masterFrame;
     private JPanel boarderPane;
     
+    
+    
+    
+    //Other
     private CustomTableModel customModel;
     
+    private final int count = 0;
+    
     private Factory factory;
-    private ArrayList<Factory> outputs = new ArrayList<>();
+    private final Factory[] outputs = new Factory[AMOUNT_OF_THREADS];
+    private final boolean[] threadCompletion = new boolean[AMOUNT_OF_THREADS];
     
-    
-    //everything below handles multithreading
-    private void multiThreading(){
+//everything below handles or is involved in multithreading someway or form
+    private Runnable runnableSetUp(int i){
         Runnable r = () -> {
-            Factory loci = new Factory(factory);
+            final Factory loci = new Factory(outputs[i]);
             for(int threadProducer=0;threadProducer<AMOUNT_OF_ITERATIONS;threadProducer++){
-                
+                loci.mutation();
+                update(i,loci);
             }
-            outputs.add(loci);
+            completionUpdate(i);
         };
-        
-        for(int iterator = 0;iterator<AMOUNT_OF_THREADS;iterator++){
-            Thread thread = new Thread(r,String.valueOf(iterator));
-            //if you need to ulter the thread do it here
-            thread.start();
+        return r;
+    }
+    
+    private void multiThreading(){
+        ScheduledExecutorService scheduledExecutorService 
+                = Executors.newSingleThreadScheduledExecutor();
+        Runnable[] jobs = new Runnable[AMOUNT_OF_THREADS];
+        for(int i=0;i<AMOUNT_OF_THREADS;i++){
+            Runnable r = runnableSetUp(i);
+            jobs[i]=r;
+        }
+        for(int i=0;i<AMOUNT_OF_THREADS;i++){
+            scheduledExecutorService.schedule(jobs[i], 250, TimeUnit.NANOSECONDS);
         }
     }
     
-    //Everything below handles GUI layout and stuff
+    private synchronized void update(int i, Factory f){
+        outputs[i]=f;
+    }
+    
+    private synchronized void completionUpdate(int i){
+        threadCompletion[i] = true;
+    }
+    
+    
+    //Everything below handles GUI layout and presets
+    private void visualUpdate(int i){
+        refreash(outputs[i].getFactory());
+    }
+    
+    private void arrayOfBaseFactorySetUps(){
+        for(int i=0;i<outputs.length;i++){
+           outputs[i]=factory; 
+           threadCompletion[i]=false;
+        }
+    }
+    
     private boolean changeTableSize(Point[][] board){
         try{
             customModel.setTable(board);
@@ -127,6 +163,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     factory = new Factory(length,width,amountOfMachines);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
+                    this.arrayOfBaseFactorySetUps();
                     //this.multiThreading();
                     
                     
@@ -135,6 +172,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     factory = new Factory(DEFAULT_TABLE_SIZE,DEFAULT_TABLE_SIZE,DEFAULT_MACHINES);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
+                    this.arrayOfBaseFactorySetUps();
                     //this.multiThreading();
                     
                     
@@ -204,7 +242,6 @@ public class GUI extends JFrame{//comments after globals are their default/start
         return button;
     }
     public GUI(){
-        
         boolean token = this.setUp();
         if(!token){System.exit(100);}
     }   

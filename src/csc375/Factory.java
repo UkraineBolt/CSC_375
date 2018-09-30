@@ -8,6 +8,7 @@ package csc375;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  *
@@ -72,9 +73,19 @@ public class Factory {
         return affinity;
     }
     
-    public String mutation(Point point){
+    public void mutation(){
+        int[] mutation = {0,0,0,0}; //top,right,bot,left
+        boolean[] doMutation = {false,false,false,false};
+        int randomPointIndex = ThreadLocalRandom.current().nextInt(allFilledPoints.size()-1);
+        Point loci = allFilledPoints.get(randomPointIndex);
+        for(int x=0;x<board.length;x++){
+            for(int y=0;y<board[x].length;y++){
+                if(board[x][y]!=null){
+                    //do something
+                }
+            }
+        }
         
-        return "X";
     }
 
 }
