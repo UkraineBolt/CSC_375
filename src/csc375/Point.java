@@ -7,16 +7,14 @@ package csc375;
 
 import java.awt.Color;
 import java.util.Random;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
  * @author alex
  */
 public class Point {
-    public ReentrantLock lock;
-    volatile int x,y;
-    private float rateOfProduction;
+    public int x,y;
+    private final float rateOfProduction;
     private final Color color;
     private final String id;
     Point(int x,int y,float rateOfProduction){
@@ -26,14 +24,21 @@ public class Point {
         float b = new Random().nextFloat();
         color = new Color(r, g, b);
         id = Float.toString(r)+Float.toString(g)+Float.toString(b);
-        lock = new ReentrantLock();
     }
     public float returnRateOfProduction(){return rateOfProduction;}
     
-    public synchronized boolean changePosition(int x,int y){
+    public boolean changePosition(int x,int y){
         this.x = x; this.y = y;
         return true;
     }
+    
+    public String getID(){
+        return id;
+    }
+    
+    public Color getColor(){
+        return color;
+    }   
     
     @Override
     public String toString(){

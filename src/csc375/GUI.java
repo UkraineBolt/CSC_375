@@ -8,7 +8,6 @@ package csc375;
 //array[row][col]==>[y][x]
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import java.util.concurrent.*;
 import javax.swing.*;
 import javax.swing.table.TableColumnModel;
@@ -58,14 +57,11 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private JPanel masterFrame;
     private JPanel boarderPane;
     
-    
-    
-    
-    //Other
     private CustomTableModel customModel;
     
-    private final int count = 0;
+    private int viewable = 0;
     
+    //functionality
     private Factory factory;
     private final Factory[] outputs = new Factory[AMOUNT_OF_THREADS];
     private final boolean[] threadCompletion = new boolean[AMOUNT_OF_THREADS];
@@ -92,7 +88,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
             jobs[i]=r;
         }
         for(int i=0;i<AMOUNT_OF_THREADS;i++){
-            scheduledExecutorService.schedule(jobs[i], 250, TimeUnit.NANOSECONDS);
+            scheduledExecutorService.schedule(jobs[i], 0, TimeUnit.NANOSECONDS);
         }
     }
     
@@ -110,11 +106,20 @@ public class GUI extends JFrame{//comments after globals are their default/start
         refreash(outputs[i].getFactory());
     }
     
+    private void changeViewable(int i){
+        viewable = i;
+    }
+    
     private void arrayOfBaseFactorySetUps(){
         for(int i=0;i<outputs.length;i++){
            outputs[i]=factory; 
            threadCompletion[i]=false;
         }
+    }
+    
+    private void refreash(Point[][] board){
+        customModel.setTable(board);
+        setUpCellSize(this.board);
     }
     
     private boolean changeTableSize(Point[][] board){
@@ -125,11 +130,6 @@ public class GUI extends JFrame{//comments after globals are their default/start
         }catch(Exception e){
             return false;
         }
-    }
-    
-    private void refreash(Point[][] board){
-        customModel.setTable(board);
-        setUpCellSize(this.board);
     }
     
     private boolean setUp(){
@@ -165,7 +165,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     this.changeTableSize(factory.getFactory());
                     this.arrayOfBaseFactorySetUps();
                     //this.multiThreading();
-                    
+                    //do{/*need a wait method*/visualUpdate(viewable);}while(!threadCompletion[viewable]);
                     
                 }catch(NumberFormatException e){
                     System.out.println("running with preset");
@@ -174,7 +174,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     this.changeTableSize(factory.getFactory());
                     this.arrayOfBaseFactorySetUps();
                     //this.multiThreading();
-                    
+                    //do{/*need a wait method*/visualUpdate(viewable);}while(!threadCompletion[viewable]);
                     
                 }catch(Exception e){
                     System.out.println("something else broke");

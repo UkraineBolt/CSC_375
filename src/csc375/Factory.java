@@ -52,7 +52,7 @@ public class Factory {
         return board;
     }
     
-    public synchronized void swap(Point point,int newx, int newy ){
+    private synchronized void swap(Point point,int newx, int newy ){
         int oldx=point.x; int oldy=point.y;
         if(board[newx][newy]==null){
             board[point.x][point.y]=null;
@@ -67,25 +67,74 @@ public class Factory {
         }
     }
     
-    private double affinity(Point point, Point point2) {
-        double distance = Math.abs((point.x - point2.x) / (point.y - point2.y));
-        double affinity = Math.sin(Math.pow(point.returnRateOfProduction() * point2.returnRateOfProduction(), 2)/distance);
+    private void newLocation(Point loci,int direction){
+        switch(direction){
+            case 1://top
+                this.swap(loci,loci.x,loci.y+1);
+                break;
+            case 2://right
+                this.swap(loci,loci.x+1,loci.y);
+                break;
+            case 3://bot
+                this.swap(loci,loci.x,loci.y-1);
+                break;
+            case 4://left
+                this.swap(loci,loci.x-1,loci.y);
+                break;
+            default:
+                System.out.println("invalid direction thus no swap");
+                break;
+        }
+    }
+    
+    private double affinity(Point point, Point point2) {//closest to 0 wins
+        double distance = Math.abs((point.y - point2.y) / (point.x - point2.x));
+        double affinity = Math.pow(point.returnRateOfProduction() * point2.returnRateOfProduction(), 2)/distance;
         return affinity;
     }
     
     public void mutation(){
-        int[] mutation = {0,0,0,0}; //top,right,bot,left
-        boolean[] doMutation = {false,false,false,false};
+        double[] mutation = {0,0,0,0}; //top,right,bot,left
+        int[] totalInSector = {0,0,0,0};
         int randomPointIndex = ThreadLocalRandom.current().nextInt(allFilledPoints.size()-1);
         Point loci = allFilledPoints.get(randomPointIndex);
-        for(int x=0;x<board.length;x++){
-            for(int y=0;y<board[x].length;y++){
-                if(board[x][y]!=null){
-                    //do something
+        for (Point otherPoint : allFilledPoints) {
+            if(!loci.getID().equals(otherPoint.getID())){
+                double a = affinity(loci,otherPoint);
+                if(loci.x<=otherPoint.x){//right
+                    mutation[1]+=a;
+                    totalInSector[1]+=1;
+                }else{//left
+                    mutation[3]+=a;
+                    totalInSector[3]+=1;
+                }
+                if(loci.y<=otherPoint.y){//top
+                    mutation[0]+=a;
+                    totalInSector[0]+=1;
+                }else{//bot
+                    mutation[2]+=a;
+                    totalInSector[2]+=1;
                 }
             }
         }
-        
+        for(int i=0;i<mutation.length;i++){
+            mutation[i] = mutation[i]/totalInSector[i];
+        }
+        int direction = mutationDirection(mutation);
+        if(direction==-1){return;}
+        this.newLocation(loci,direction);
+    }
+    
+    private int mutationDirection(double[] mutationDirectionAffinity){
+        int x = -1;
+        double initial = mutationDirectionAffinity[0];
+        for(int i=1;i<mutationDirectionAffinity.length;i++){
+            if(initial>=mutationDirectionAffinity[i]){
+                x = i;
+                initial = mutationDirectionAffinity[i];
+            }
+        }
+        return x;
     }
 
 }
