@@ -8,7 +8,6 @@ package csc375;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  *
@@ -16,9 +15,10 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Factory {
     private final Point[][] board;
-    ArrayList<Point> allFilledPoints = new ArrayList<>();
+    private ArrayList<Point> allFilledPoints = new ArrayList<>();
     Factory(Factory f){
         board = f.getFactory();
+        allFilledPoints = f.getPoints();
     }
 
     Factory(int length, int width, int machinesToUse) {
@@ -47,6 +47,10 @@ public class Factory {
         }
         board = emptyBoard;
     }
+    
+    public ArrayList<Point> getPoints(){
+        return allFilledPoints;
+    }
 
     public synchronized Point[][] getFactory() {
         return board;
@@ -54,6 +58,7 @@ public class Factory {
     
     private synchronized void swap(Point point,int newx, int newy ){
         int oldx=point.x; int oldy=point.y;
+        if(newx<0 || newy<0){System.out.println("error");return;}
         if(board[newx][newy]==null){
             board[point.x][point.y]=null;
             board[newx][newy]=point;
@@ -88,7 +93,15 @@ public class Factory {
     }
     
     private double affinity(Point point, Point point2) {//closest to 0 wins
-        double distance = Math.abs((point.y - point2.y) / (point.x - point2.x));
+        double distance;
+        if((point.x - point2.x)==0){
+            distance = Math.abs(point.x - point2.x);
+        }else if((point.y - point2.y)==0){
+            distance = Math.abs(point.y - point2.y);
+        }else{
+            distance = Math.abs((point.y - point2.y) / (point.x - point2.x));
+        }
+        
         double affinity = Math.pow(point.returnRateOfProduction() * point2.returnRateOfProduction(), 2)/distance;
         return affinity;
     }
@@ -96,7 +109,7 @@ public class Factory {
     public void mutation(){
         double[] mutation = {0,0,0,0}; //top,right,bot,left
         int[] totalInSector = {0,0,0,0};
-        int randomPointIndex = ThreadLocalRandom.current().nextInt(allFilledPoints.size()-1);
+        int randomPointIndex = new Random().nextInt(allFilledPoints.size()-1);
         Point loci = allFilledPoints.get(randomPointIndex);
         for (Point otherPoint : allFilledPoints) {
             if(!loci.getID().equals(otherPoint.getID())){
@@ -126,7 +139,7 @@ public class Factory {
     }
     
     private int mutationDirection(double[] mutationDirectionAffinity){
-        int x = -1;
+        int x = 0;
         double initial = mutationDirectionAffinity[0];
         for(int i=1;i<mutationDirectionAffinity.length;i++){
             if(initial>=mutationDirectionAffinity[i]){

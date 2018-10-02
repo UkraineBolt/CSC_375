@@ -40,7 +40,7 @@ public class CustomTableModel extends AbstractTableModel {
     }
 
     @Override
-    public Point getValueAt(int row, int col) {
-        return table[col][row];
+    public Point getValueAt(int y, int x) {
+        return table[x][y];
     }
 }

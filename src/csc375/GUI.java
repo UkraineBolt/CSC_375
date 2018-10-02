@@ -9,6 +9,8 @@ package csc375;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.table.TableColumnModel;
 
@@ -40,7 +42,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private static final int ROWSIZE = 10;//10
     private static final int TEXTFIELD_COLUMNSIZE = 10;//10
     
-    private static final int AMOUNT_OF_THREADS = 1;
+    private static final int AMOUNT_OF_THREADS = 4;
     private static final int AMOUNT_OF_ITERATIONS = 1000;
     
     //GUI stuff
@@ -67,28 +69,43 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private final boolean[] threadCompletion = new boolean[AMOUNT_OF_THREADS];
     
 //everything below handles or is involved in multithreading someway or form
-    private Runnable runnableSetUp(int i){
+    private Runnable runnableSetUp(int z){
         Runnable r = () -> {
+            System.out.println("start");
+            final int i = z;
             final Factory loci = new Factory(outputs[i]);
+            int counter = 0;
             for(int threadProducer=0;threadProducer<AMOUNT_OF_ITERATIONS;threadProducer++){
                 loci.mutation();
                 update(i,loci);
+                if(counter == 5){
+                visualUpdate(i);
+                counter = 0;
+                }
+                counter++;
+                System.out.println("stuff");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             completionUpdate(i);
+            System.out.println("end");
         };
         return r;
     }
     
     private void multiThreading(){
-        ScheduledExecutorService scheduledExecutorService 
-                = Executors.newSingleThreadScheduledExecutor();
+        ExecutorService scheduledExecutorService 
+                = Executors.newFixedThreadPool(AMOUNT_OF_THREADS);
         Runnable[] jobs = new Runnable[AMOUNT_OF_THREADS];
         for(int i=0;i<AMOUNT_OF_THREADS;i++){
             Runnable r = runnableSetUp(i);
             jobs[i]=r;
         }
         for(int i=0;i<AMOUNT_OF_THREADS;i++){
-            scheduledExecutorService.schedule(jobs[i], 0, TimeUnit.NANOSECONDS);
+            scheduledExecutorService.execute(jobs[i]);
         }
     }
     
@@ -103,7 +120,9 @@ public class GUI extends JFrame{//comments after globals are their default/start
     
     //Everything below handles GUI layout and presets
     private void visualUpdate(int i){
-        refreash(outputs[i].getFactory());
+        if(i==viewable){
+            refreash(outputs[i].getFactory());
+        }
     }
     
     private void changeViewable(int i){
@@ -164,8 +183,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
                     this.arrayOfBaseFactorySetUps();
-                    //this.multiThreading();
-                    //do{/*need a wait method*/visualUpdate(viewable);}while(!threadCompletion[viewable]);
+                    this.multiThreading();
                     
                 }catch(NumberFormatException e){
                     System.out.println("running with preset");
@@ -173,8 +191,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
                     this.arrayOfBaseFactorySetUps();
-                    //this.multiThreading();
-                    //do{/*need a wait method*/visualUpdate(viewable);}while(!threadCompletion[viewable]);
+                    this.multiThreading();
                     
                 }catch(Exception e){
                     System.out.println("something else broke");
