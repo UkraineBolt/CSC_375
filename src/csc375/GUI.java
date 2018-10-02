@@ -41,33 +41,33 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private static final int TEXTFIELD_COLUMNSIZE = 10;//10
     
     private static final int AMOUNT_OF_THREADS = 40;
-    private int AMOUNT_OF_ITERATIONS;
+    private volatile int AMOUNT_OF_ITERATIONS;
     
     //GUI stuff
-    private JButton jbutton;
-    private JLabel jlabelx;
-    private JTextField jtextfieldx;
-    private JLabel jlabely;
-    private JTextField jtextfieldy;
-    private JLabel jlabelAmount;
-    private JTextField jtextfieldAmount;
+    private volatile JButton jbutton;
+    private volatile JLabel jlabelx;
+    private volatile JTextField jtextfieldx;
+    private volatile JLabel jlabely;
+    private volatile JTextField jtextfieldy;
+    private volatile JLabel jlabelAmount;
+    private volatile JTextField jtextfieldAmount;
     
-    private JTable board;
+    private volatile JTable board;
     
-    private JPanel masterFrame;
-    private JPanel boarderPane;
+    private volatile JPanel masterFrame;
+    private volatile JPanel boarderPane;
     
-    private CustomTableModel customModel;
+    private volatile CustomTableModel customModel;
     
-    private int viewable = 0;
+    private volatile int viewable = 0;
     
     //functionality
     private boolean run = false;
     
-    private Factory factory;
-    private final Factory[] outputs = new Factory[AMOUNT_OF_THREADS];
+    private volatile Factory factory;
+    private final Factory[] outputs = new Factory[AMOUNT_OF_THREADS]; 
     
-    ExecutorService scheduledExecutorService;
+    private ExecutorService scheduledExecutorService;
     
 //everything below handles or is involved in multithreading someway or form
     private Runnable runnableSetUp(int z){
@@ -118,7 +118,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
     //Everything below handles GUI layout and presets
     private void visualUpdate(int i){
         if(i==viewable){
-            refreash(outputs[i].getFactory());
+            customModel.changeData(outputs[i].getFactory());
         }
     }
     
@@ -130,11 +130,6 @@ public class GUI extends JFrame{//comments after globals are their default/start
         for(int i=0;i<outputs.length;i++){
            outputs[i]=factory; 
         }
-    }
-    
-    private void refreash(Point[][] board){
-        customModel.changeData(board);
-        //setUpCellSize(this.board);
     }
     
     private boolean changeTableSize(Point[][] board){

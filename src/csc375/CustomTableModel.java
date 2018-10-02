@@ -12,7 +12,7 @@ import javax.swing.table.AbstractTableModel;
  * @author alex
  */
 public class CustomTableModel extends AbstractTableModel {
-    private Point[][] table;
+    private volatile Point[][] table;
     
     CustomTableModel(Point[][] table){
         this.table=table;

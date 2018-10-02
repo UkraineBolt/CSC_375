@@ -15,7 +15,7 @@ import java.util.Random;
  */
 public class Factory {
     private final Point[][] board;
-    private ArrayList<Point> allFilledPoints = new ArrayList<>();
+    private volatile ArrayList<Point> allFilledPoints = new ArrayList<>();
     Factory(Factory f){
         board = f.getFactory();
         allFilledPoints = f.getPoints();
