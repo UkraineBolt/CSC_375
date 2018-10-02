@@ -17,6 +17,11 @@ public class CustomTableModel extends AbstractTableModel {
     CustomTableModel(Point[][] table){
         this.table=table;
     }
+    
+    public void changeData(Point[][] table){
+        this.table = table;
+        fireTableDataChanged();
+    }
 
     public void setTable(Point[][] table) {
         this.table = table;

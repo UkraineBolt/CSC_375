@@ -9,8 +9,6 @@ package csc375;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.table.TableColumnModel;
 
@@ -42,8 +40,8 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private static final int ROWSIZE = 10;//10
     private static final int TEXTFIELD_COLUMNSIZE = 10;//10
     
-    private static final int AMOUNT_OF_THREADS = 4;
-    private static final int AMOUNT_OF_ITERATIONS = 1000;
+    private static final int AMOUNT_OF_THREADS = 40;
+    private int AMOUNT_OF_ITERATIONS;
     
     //GUI stuff
     private JButton jbutton;
@@ -64,9 +62,12 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private int viewable = 0;
     
     //functionality
+    private boolean run = false;
+    
     private Factory factory;
     private final Factory[] outputs = new Factory[AMOUNT_OF_THREADS];
-    private final boolean[] threadCompletion = new boolean[AMOUNT_OF_THREADS];
+    
+    ExecutorService scheduledExecutorService;
     
 //everything below handles or is involved in multithreading someway or form
     private Runnable runnableSetUp(int z){
@@ -83,38 +84,34 @@ public class GUI extends JFrame{//comments after globals are their default/start
                 counter = 0;
                 }
                 counter++;
-                System.out.println("stuff");
+                System.out.println("stuff at "+i);
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                    System.out.println("interrupted");;
+                    break;
                 }
             }
-            completionUpdate(i);
             System.out.println("end");
         };
         return r;
     }
     
     private void multiThreading(){
-        ExecutorService scheduledExecutorService 
-                = Executors.newFixedThreadPool(AMOUNT_OF_THREADS);
         Runnable[] jobs = new Runnable[AMOUNT_OF_THREADS];
         for(int i=0;i<AMOUNT_OF_THREADS;i++){
             Runnable r = runnableSetUp(i);
             jobs[i]=r;
         }
+        scheduledExecutorService = Executors.newFixedThreadPool(AMOUNT_OF_THREADS);
         for(int i=0;i<AMOUNT_OF_THREADS;i++){
             scheduledExecutorService.execute(jobs[i]);
         }
+        
     }
     
     private synchronized void update(int i, Factory f){
         outputs[i]=f;
-    }
-    
-    private synchronized void completionUpdate(int i){
-        threadCompletion[i] = true;
     }
     
     
@@ -132,13 +129,12 @@ public class GUI extends JFrame{//comments after globals are their default/start
     private void arrayOfBaseFactorySetUps(){
         for(int i=0;i<outputs.length;i++){
            outputs[i]=factory; 
-           threadCompletion[i]=false;
         }
     }
     
     private void refreash(Point[][] board){
-        customModel.setTable(board);
-        setUpCellSize(this.board);
+        customModel.changeData(board);
+        //setUpCellSize(this.board);
     }
     
     private boolean changeTableSize(Point[][] board){
@@ -167,6 +163,9 @@ public class GUI extends JFrame{//comments after globals are their default/start
             jbutton=this.setUpJButton("Begin Program");
             jbutton.addActionListener((ActionEvent action) -> {
                 try {
+                    if(run){
+                        scheduledExecutorService.shutdownNow();
+                    }else{run=true;}
                     String stringx = jtextfieldx.getText();
                     String stringy = jtextfieldy.getText();
                     String amount = jtextfieldAmount.getText();
@@ -176,6 +175,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     int length = Integer.parseInt(stringx);
                     int width = Integer.parseInt(stringy);
                     int amountOfMachines = Integer.parseInt(amount);
+                    AMOUNT_OF_ITERATIONS = 2* amountOfMachines;
                     if (length >= 32 && width >= 32 && length <= 99 && width <= 73 && amountOfMachines < 5 && amountOfMachines < length * width) {
                         throw new NumberFormatException();
                     }
@@ -187,6 +187,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
                     
                 }catch(NumberFormatException e){
                     System.out.println("running with preset");
+                    AMOUNT_OF_ITERATIONS = 2* DEFAULT_MACHINES;
                     factory = new Factory(DEFAULT_TABLE_SIZE,DEFAULT_TABLE_SIZE,DEFAULT_MACHINES);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());

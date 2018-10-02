@@ -58,7 +58,10 @@ public class Factory {
     
     private synchronized void swap(Point point,int newx, int newy ){
         int oldx=point.x; int oldy=point.y;
-        if(newx<0 || newy<0){System.out.println("error");return;}
+        if(newx<0 || newy<0 || newx>=board.length || newy>=board[0].length){
+            System.out.println("out of bounds x or y");
+            return;
+        }
         if(board[newx][newy]==null){
             board[point.x][point.y]=null;
             board[newx][newy]=point;
@@ -74,16 +77,16 @@ public class Factory {
     
     private void newLocation(Point loci,int direction){
         switch(direction){
-            case 1://top
+            case 0://top
                 this.swap(loci,loci.x,loci.y+1);
                 break;
-            case 2://right
+            case 1://right
                 this.swap(loci,loci.x+1,loci.y);
                 break;
-            case 3://bot
+            case 2://bot
                 this.swap(loci,loci.x,loci.y-1);
                 break;
-            case 4://left
+            case 3://left
                 this.swap(loci,loci.x-1,loci.y);
                 break;
             default:
@@ -95,9 +98,9 @@ public class Factory {
     private double affinity(Point point, Point point2) {//closest to 0 wins
         double distance;
         if((point.x - point2.x)==0){
-            distance = Math.abs(point.x - point2.x);
-        }else if((point.y - point2.y)==0){
             distance = Math.abs(point.y - point2.y);
+        }else if((point.y - point2.y)==0){
+            distance = Math.abs(point.x - point2.x);
         }else{
             distance = Math.abs((point.y - point2.y) / (point.x - point2.x));
         }
