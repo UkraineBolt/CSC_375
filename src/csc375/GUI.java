@@ -116,7 +116,7 @@ public class GUI extends JFrame{//comments after globals are their default/start
     
     
     //Everything below handles GUI layout and presets
-    private void visualUpdate(int i){
+    private synchronized void visualUpdate(int i){
         if(i==viewable){
             customModel.changeData(outputs[i].getFactory());
         }
