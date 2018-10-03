@@ -5,6 +5,8 @@
  */
 package csc375;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -12,6 +14,7 @@ import javax.swing.table.AbstractTableModel;
  * @author alex
  */
 public class CustomTableModel extends AbstractTableModel {
+    private Lock lockone = new ReentrantLock();
     private volatile Point[][] table;
     
     CustomTableModel(Point[][] table){
@@ -19,12 +22,17 @@ public class CustomTableModel extends AbstractTableModel {
     }
     
     public void changeData(Point[][] table){
+        lockone.lock();
+        try{
         this.table = table;
         fireTableDataChanged();
+        }finally{
+            lockone.unlock();
+        }
     }
 
     public void setTable(Point[][] table) {
-        this.table = table;
+        this.table = (Point[][]) table.clone();
         fireTableDataChanged();
         fireTableStructureChanged();
     }

@@ -8,6 +8,7 @@ package csc375;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  *
@@ -112,7 +113,7 @@ public class Factory {
     public void mutation(){
         double[] mutation = {0,0,0,0}; //top,right,bot,left
         int[] totalInSector = {0,0,0,0};
-        int randomPointIndex = new Random().nextInt(allFilledPoints.size()-1);
+        int randomPointIndex = ThreadLocalRandom.current() .nextInt(allFilledPoints.size()-1);;
         Point loci = allFilledPoints.get(randomPointIndex);
         for (Point otherPoint : allFilledPoints) {
             if(!loci.getID().equals(otherPoint.getID())){
@@ -145,12 +146,18 @@ public class Factory {
         int x = 0;
         double initial = mutationDirectionAffinity[0];
         for(int i=1;i<mutationDirectionAffinity.length;i++){
-            if(initial>=mutationDirectionAffinity[i]){
+            if(initial<=mutationDirectionAffinity[i]){
                 x = i;
                 initial = mutationDirectionAffinity[i];
             }
         }
         return x;
+    }
+    
+    public double fitness(){
+        
+        
+        return 0;
     }
 
 }
