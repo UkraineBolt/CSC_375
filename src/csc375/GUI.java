@@ -9,6 +9,8 @@ package csc375;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -75,8 +77,10 @@ public class GUI extends JFrame {//comments after globals are their default/star
 
     private volatile Factory factory;
     private final Factory[] outputs = new Factory[AMOUNT_OF_THREADS];
-    private volatile int index;
-    private volatile double fitness;
+    private volatile int index=-1;
+    private volatile double fitness=-1;
+    private final Lock l = new ReentrantLock();
+    private final Lock l2 = new ReentrantLock();
 
     private ExecutorService scheduledExecutorService;
 
@@ -92,7 +96,6 @@ public class GUI extends JFrame {//comments after globals are their default/star
             final CountDownLatch locallatch = latch1;
             final CountDownLatch flatct = latch2;
             final int i = z;
-            //final Factory loci = new Factory(outputs[i]);
             Factory loci = new Factory(len, wid, mac);
             int counter = 0;
             int merge = 0;
@@ -111,16 +114,14 @@ public class GUI extends JFrame {//comments after globals are their default/star
                 }
                 if (merge == 50) {
                     double d = loci.fitness();
+                    this.setFitness(i,d,loci);
                     locallatch.countDown();
                     try {
                         locallatch.await();
-                        
-                       
-                        
                     } catch (InterruptedException ex) {
                         Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    
+                    loci=new Factory(getUpdatedFactory());
                 }
                 counter++;
                 merge++;
@@ -130,6 +131,27 @@ public class GUI extends JFrame {//comments after globals are their default/star
             System.out.println("end");
         };
         return r;
+    }
+    
+    private void setFitness(int dex, double fit,Factory fa){
+        l.lock();
+        try{
+            if(fit>fitness){
+                index=dex;
+                fitness=fit;
+                factory = fa;
+            }
+        }finally{
+            l.unlock();
+        }
+    }
+    private Factory getUpdatedFactory(){
+        l2.lock();
+        try{
+            return factory;
+        }finally{
+            l2.unlock();
+        }
     }
 
     private void multiThreading() {
@@ -210,7 +232,6 @@ public class GUI extends JFrame {//comments after globals are their default/star
                     factory = new Factory(length, width, amountOfMachines);
                     System.out.println("factory is built");
                     this.changeTableSize(factory.getFactory());
-                    //this.arrayOfBaseFactorySetUps();
                     this.multiThreading();
 
                 } catch (NumberFormatException e) {
@@ -222,7 +243,6 @@ public class GUI extends JFrame {//comments after globals are their default/star
                     wid = DEFAULT_TABLE_SIZE;
                     mac = DEFAULT_MACHINES;
                     this.changeTableSize(factory.getFactory());
-                    //this.arrayOfBaseFactorySetUps();
                     this.multiThreading();
 
                 } catch (Exception e) {

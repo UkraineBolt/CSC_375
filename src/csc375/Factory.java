@@ -18,8 +18,15 @@ public class Factory {
     private final Point[][] board;
     private volatile ArrayList<Point> allFilledPoints = new ArrayList<>();
     Factory(Factory f){
-        board = f.getFactory();
-        allFilledPoints = f.getPoints();
+        Point[][] newBoard = new Point[f.getFactory().length][f.getFactory()[0].length];
+        ArrayList<Point> listOfPoints = f.getPoints();
+        allFilledPoints = new ArrayList<>();
+        for(int i=0;i<listOfPoints.size();i++){
+            Point newPoint = new Point(listOfPoints.get(i));
+            newBoard[newPoint.x][newPoint.y] = newPoint;
+            allFilledPoints.add(newPoint);
+        }
+        board=newBoard;
     }
 
     Factory(int length, int width, int machinesToUse) {
@@ -155,9 +162,17 @@ public class Factory {
     }
     
     public double fitness(){
+        double fit = 0;
+        for(int i=0;i<allFilledPoints.size();i++){
+            Point temp =allFilledPoints.get(i);
+            for(int i2=i;i2<allFilledPoints.size();i2++){
+                if(i!=i2){
+                    fit += affinity(allFilledPoints.get(i), allFilledPoints.get(i2));
+                }
+            }
+        }
+        fit = fit/allFilledPoints.size();
         
-        
-        return 0;
+        return fit;
     }
-
 }

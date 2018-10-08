@@ -25,6 +25,15 @@ public class Point {
         color = new Color(r, g, b);
         id = Float.toString(r)+Float.toString(g)+Float.toString(b);
     }
+    
+    Point(Point point){
+        x = point.x;
+        y = point.y;
+        rateOfProduction = point.returnRateOfProduction();
+        color = point.getColor();
+        id = point.getID();
+    }
+    
     public float returnRateOfProduction(){return rateOfProduction;}
     
     public boolean changePosition(int x,int y){
