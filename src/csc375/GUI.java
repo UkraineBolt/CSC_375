@@ -77,7 +77,6 @@ public class GUI extends JFrame {//comments after globals are their default/star
 
     private volatile Factory factory;
     private final Factory[] outputs = new Factory[AMOUNT_OF_THREADS];
-    private volatile int index=-1;
     private volatile double fitness=-1;
     private final Lock l = new ReentrantLock();
     private final Lock l2 = new ReentrantLock();
@@ -86,15 +85,13 @@ public class GUI extends JFrame {//comments after globals are their default/star
 
     private volatile int len, wid, mac;
 
-    final CountDownLatch latch1 = new CountDownLatch(AMOUNT_OF_THREADS);
-    final CountDownLatch latch2 = new CountDownLatch(1);
+    volatile CountDownLatch latch1 = new CountDownLatch(AMOUNT_OF_THREADS);
 
 //everything below handles or is involved in multithreading someway or form
     private Runnable runnableSetUp(int z) {
         Runnable r = () -> {
             System.out.println("start");
             final CountDownLatch locallatch = latch1;
-            final CountDownLatch flatct = latch2;
             final int i = z;
             Factory loci = new Factory(len, wid, mac);
             int counter = 0;
@@ -112,9 +109,9 @@ public class GUI extends JFrame {//comments after globals are their default/star
                     System.out.println("interrupted");;
                     break;
                 }
-                if (merge == 50) {
+                if (merge == 200) {
                     double d = loci.fitness();
-                    this.setFitness(i,d,loci);
+                    this.setFitness(d,loci);
                     locallatch.countDown();
                     try {
                         locallatch.await();
@@ -122,6 +119,12 @@ public class GUI extends JFrame {//comments after globals are their default/star
                         Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     loci=new Factory(getUpdatedFactory());
+                    System.out.println("new factory");
+                    if(i==0){
+                        latch1 = new CountDownLatch(AMOUNT_OF_THREADS);
+                        System.out.println("new latch");
+                    }
+                    merge=0;
                 }
                 counter++;
                 merge++;
@@ -133,11 +136,10 @@ public class GUI extends JFrame {//comments after globals are their default/star
         return r;
     }
     
-    private void setFitness(int dex, double fit,Factory fa){
+    private void setFitness(double fit,Factory fa){
         l.lock();
         try{
             if(fit>fitness){
-                index=dex;
                 fitness=fit;
                 factory = fa;
             }
@@ -164,7 +166,6 @@ public class GUI extends JFrame {//comments after globals are their default/star
         for (int i = 0; i < AMOUNT_OF_THREADS; i++) {
             scheduledExecutorService.execute(jobs[i]);
         }
-
     }
 
     private synchronized void update(int i, Factory f) {
@@ -266,8 +267,7 @@ public class GUI extends JFrame {//comments after globals are their default/star
                     jlabelthreadDisplay.setText(String.valueOf(viewable + 1));
                 }
             });
-
-            //jbuttonbackArrow.setVisible(false);jlabelthreadDisplay.setVisible(false);jbuttonfowardArrow.setVisible(false);
+            
             JPanel panel = this.setStaticPanel(jlabelx, jtextfieldx, jlabely, jtextfieldy, jlabelAmount, jtextfieldAmount, jbutton, jbuttonbackArrow, jlabelthreadDisplay, jbuttonfowardArrow);
 
             customModel = new CustomTableModel(new Point[DEFAULT_TABLE_SIZE][DEFAULT_TABLE_SIZE]);
